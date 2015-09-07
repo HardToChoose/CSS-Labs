@@ -1,0 +1,216 @@
+﻿<Window
+    x:Class="Lab_1.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    
+    xmlns:local="clr-namespace:Lab_1"
+    xmlns:graph="clr-namespace:Lab_1.Graph"
+    xmlns:conv="clr-namespace:Lab_1.Converters"
+    
+    xmlns:graphx="clr-namespace:GraphX.Controls;assembly=GraphX.Controls"
+    
+    MinHeight="560"
+    MinWidth="720"
+    Height="2"
+    Width="2"
+    
+    Title="Lab 1-2"
+    DataContext="{Binding Main, Source={StaticResource Locator}}"
+
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d"
+    
+    SizeChanged="Window_SizeChanged">
+
+    <Window.Resources>
+        <conv:IncrementConverter x:Key="IncConverter" />
+        
+        <Style x:Key="ExpressionLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Consolas" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="Margin" Value="0,20,0,30" />
+        </Style>
+
+        <Style x:Key="HeightLabel" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Verdana" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="12,0,30,10" />
+        </Style>
+        
+        <Style x:Key="Graph" TargetType="graphx:ZoomControl">
+            <Setter Property="Margin" Value="0,0,0,30" />
+        </Style>
+    </Window.Resources>
+    
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding ViewLoaded}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
+    <Grid Margin="0,0,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="2*" />
+        </Grid.ColumnDefinitions>
+
+        <TabControl x:Name="Tabs"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.Row="0"
+            
+            Margin="10,10,10,10"
+            SelectedIndex="{Binding ActiveTabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+            <TabItem
+                FontSize="13"
+                Header="Початковий код">
+                <local:CodeEditor
+                    x:Name="Code"
+                    CodeText="{Binding Document,
+                    Mode=TwoWay,
+                    UpdateSourceTrigger=PropertyChanged}"
+                    TabIndex="0" />
+            </TabItem>
+            
+            <TabItem
+                FontSize="13"
+                Header="Помилки">
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalContentAlignment="Left">
+                    <DataGrid
+                        ItemsSource="{Binding Path=ParsingErrors, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Stretch"
+                        Background="White"
+                        AutoGenerateColumns="False"
+                        HeadersVisibility="Column" SelectionMode="Single" CanUserResizeRows="False" CanUserDeleteRows="False">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Message}" Header="Опис" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Binding="{Binding Type}" Header="Тип" Width="Auto" IsReadOnly="True" />
+                            <DataGridTextColumn Binding="{Binding Location.Line, Converter={StaticResource IncConverter}}" Header="Рядок" Width="Auto" IsReadOnly="True" />
+                            <DataGridTextColumn Binding="{Binding Location.Position, Converter={StaticResource IncConverter}}" Header="Колонка" Width="Auto" IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem
+                FontSize="13"
+                Header="Дерево розбору">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.ColumnSpan="2"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource ExpressionLabel}"
+                               Text="{Binding CodeText, ElementName=Code}" />
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               VerticalAlignment="Bottom"
+                               Style="{StaticResource HeightLabel}"
+                               Text="{Binding Path=Tree.Height, StringFormat='Висота: \{0\}', UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+
+                    <graphx:ZoomControl x:Name="TreeGraphZoomCtrl"
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        Style="{StaticResource Graph}">
+                        <graph:TreeGraphArea x:Name="TreeGraphArea"
+                                             LogicCore="{Binding TreeGraph}">
+                        </graph:TreeGraphArea>
+                    </graphx:ZoomControl>
+                </Grid>
+            </TabItem>
+
+            <TabItem
+                FontSize="13"
+                Header="Дерево паралельної форми">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Grid.ColumnSpan="2"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource ExpressionLabel}"
+                               Text="{Binding CodeText, ElementName=Code}" />
+                    <TextBlock Grid.Row="1"
+                               Grid.Column="0"
+                               VerticalAlignment="Bottom"
+                               Style="{StaticResource HeightLabel}"
+                               Text="{Binding Path=ParallelTree.Height, StringFormat='Висота: \{0\}', UpdateSourceTrigger=PropertyChanged, Mode=OneWay}" />
+                    
+                    <graphx:ZoomControl
+                        x:Name="ParallelTreeGraphZoomCtrl"
+                        Grid.Column="1"
+                        Grid.Row="1"
+                        Style="{StaticResource Graph}">
+                        <graph:TreeGraphArea x:Name="ParallelTreeGraphArea"
+                                             LogicCore="{Binding ParallelTreeGraph}" />
+                    </graphx:ZoomControl>
+                </Grid>
+            </TabItem>
+
+        </TabControl>
+        <Button
+            Command="{Binding OpenCommand}"
+            Grid.Column="0"
+            Grid.Row="1"
+            
+            Height="30"
+            Width="105"
+            Margin="10,0,10,10"
+            
+            HorizontalAlignment="Right"
+            VerticalAlignment="Top"
+            
+            Content="Відкрити"
+            FontSize="14">
+        </Button>
+        <StackPanel
+            Orientation="Horizontal"
+            Grid.Column="1"
+            Grid.Row="1">
+            <Button
+                Command="{Binding AnalyzeCommand}"
+                
+                Height="30"
+                Width="147"
+                Margin="10,0,30,10"
+            
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+            
+                Content="Провести аналіз"
+                FontSize="14">
+            </Button>
+            <CheckBox
+                Content="шукати всі помилки"
+                VerticalContentAlignment="Center"
+                FontSize="14"
+                
+                IsChecked="{Binding FindAllErrors, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                VerticalAlignment="Stretch" />
+        </StackPanel>
+    </Grid>
+</Window>

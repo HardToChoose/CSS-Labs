@@ -1,0 +1,58 @@
+﻿<UserControl
+    x:Class="Lab_1.CodeEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    
+    x:Name="me"
+    d:DesignHeight="300"
+    d:DesignWidth="300"
+    mc:Ignorable="d">
+    
+    <Grid DataContext="{Binding ElementName=me}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" MinWidth="40" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBox
+            Name="LineNumbers"
+            IsEnabled="False"
+            
+            Grid.Column="0"
+            Margin="8,0,5,0"
+            BorderThickness="0"
+            
+            AcceptsReturn="True"
+            TextWrapping="Wrap" 
+            
+            Background="{Binding Path=Background}"
+            FontSize="{Binding ElementName=Code, Path=FontSize}"
+            FontFamily="{Binding ElementName=Code, Path=FontFamily}"/>
+
+        <ScrollViewer
+            VerticalScrollBarVisibility="Auto"
+            HorizontalContentAlignment="Left"
+            Grid.Column="1"
+            ScrollChanged="Code_Scrolled">
+            <TextBox
+                Name="Code"
+                TabIndex="{Binding Path=TabIndex, RelativeSource={RelativeSource Self}}"
+                Text="{Binding CodeText,
+                    Mode=TwoWay,
+                    UpdateSourceTrigger=PropertyChanged}"
+            
+                AcceptsReturn="True"
+                TextWrapping="Wrap"
+                TextChanged="Code_TextChanged"
+                
+                FontFamily="Courier New"
+                FontSize="15">
+            </TextBox>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
